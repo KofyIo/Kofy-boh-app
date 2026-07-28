@@ -41,15 +41,20 @@
   <button onclick="location.reload()">Reintentar</button>
 </div>
 <script>
-  // This page only shows before the remote site responds, or with no connection.
-  // If we're still here after a few seconds, assume offline and offer retry.
-  setTimeout(function () {
-    if (!navigator.onLine) {
-      document.getElementById('box').parentElement.classList.add('offline')
-      document.getElementById('msg').textContent = 'Sin conexión. Revisa tu internet e intenta de nuevo.'
-    }
-  }, 4000)
-  window.addEventListener('online', function () { location.reload() })
+  // Bundled boot screen: hop straight into the team hub when online.
+  // (v0.3 pattern — no server.url; allowNavigation keeps kofy.io in-app.)
+  var HUB = 'https://kofy.io/hub'
+  function go () { window.location.replace(HUB) }
+
+  if (navigator.onLine) {
+    go()
+  } else {
+    document.getElementById('box').parentElement.classList.add('offline')
+    document.getElementById('msg').textContent = 'Sin conexión. Revisa tu internet e intenta de nuevo.'
+  }
+  // If we're somehow still here after a few seconds (flaky network), retry.
+  setTimeout(function () { if (navigator.onLine) go() }, 4000)
+  window.addEventListener('online', go)
 </script>
 </body>
 </html>

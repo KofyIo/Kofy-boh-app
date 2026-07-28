@@ -3,17 +3,21 @@ import type { CapacitorConfig } from '@capacitor/cli'
 /**
  * 22G Systems — Kofy back-of-house (BOH) native shell.
  *
- * SEPARATE app from the customer Kofy app (io.kofy.app), same proven strategy:
- * a thin Capacitor shell that loads the LIVE site rather than bundling code.
- * This one opens straight into the team hub. The (internal) zone is server-
- * gated by middleware (signed kofy_team cookie) — without a team login the
- * app only ever shows the /equipo password screen, so the tools stay
- * invisible to anyone who shouldn't know they exist.
+ * SEPARATE app from the customer Kofy app (io.kofy.app). The shell boots the
+ * bundled native-shell/index.html (branded loading/offline screen), which
+ * immediately redirects the webview to https://kofy.io/hub. allowNavigation
+ * keeps kofy.io INSIDE the app webview instead of bouncing to Chrome.
  *
- * Tool updates ship via git push to kofy-website (no app rebuild). Only
- * native changes (icon/splash/plugins) require a Codemagic rebuild here.
+ * v0.3 note: we deliberately do NOT use server.url here. The customer app
+ * uses an origin-only server.url; ours needed a path (/hub), and a pathed
+ * server.url was the prime suspect in the v0.1/v0.2 launch crashes. The
+ * local-redirect pattern achieves the same "opens at the hub" result.
  *
- * `native-shell/` is the bundled fallback (branded loading / offline screen).
+ * The (internal) zone is server-gated (signed kofy_team cookie) — without a
+ * team login the app only ever shows the /equipo password screen.
+ *
+ * Tool updates ship via kofy-website pushes (no rebuild here). Rebuild only
+ * for icon/splash/plugin/appId changes.
  */
 const config: CapacitorConfig = {
   appId: 'io.kofy.g22',        // '22g' can't start a package segment — g22 is the permanent id
@@ -21,7 +25,7 @@ const config: CapacitorConfig = {
   webDir: 'native-shell',
   backgroundColor: '#0a0610',  // internal-zone dark, not the customer cream
   server: {
-    url: 'https://kofy.io/hub', // middleware bounces to /equipo login when logged out
+    allowNavigation: ['kofy.io', '*.kofy.io'],
     cleartext: false,
   },
 }
