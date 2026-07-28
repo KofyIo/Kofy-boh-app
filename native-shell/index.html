@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>22G Systems</title>
+<style>
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: #0a0610; color: #f3e8d4;
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    padding: 24px;
+  }
+  .box { max-width: 300px; }
+  .logo { font-size: 40px; }
+  h1 { font-size: 14px; font-weight: 700; letter-spacing: 0.22em; margin: 16px 0 8px; color: #f5e6d3; }
+  p  { font-size: 13px; color: #9e8db8; line-height: 1.6; margin: 0 0 20px; }
+  .dot {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: #f5c842; margin: 0 3px; animation: pulse 1.2s infinite ease-in-out;
+  }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes pulse { 0%,100% { opacity: 0.25; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.1); } }
+  button {
+    background: none; border: 1px solid #2a2138; color: #9e8db8;
+    padding: 10px 20px; border-radius: 8px; font-size: 12px; font-family: inherit;
+    letter-spacing: 0.06em; cursor: pointer; display: none;
+  }
+  .offline button { display: inline-block; }
+  .offline .dots { display: none; }
+</style>
+</head>
+<body>
+<div class="box" id="box">
+  <div class="logo">⚙️</div>
+  <h1>22G SYSTEMS</h1>
+  <p id="msg">Conectando…</p>
+  <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+  <button onclick="location.reload()">Reintentar</button>
+</div>
+<script>
+  // This page only shows before the remote site responds, or with no connection.
+  // If we're still here after a few seconds, assume offline and offer retry.
+  setTimeout(function () {
+    if (!navigator.onLine) {
+      document.getElementById('box').parentElement.classList.add('offline')
+      document.getElementById('msg').textContent = 'Sin conexión. Revisa tu internet e intenta de nuevo.'
+    }
+  }, 4000)
+  window.addEventListener('online', function () { location.reload() })
+</script>
+</body>
+</html>

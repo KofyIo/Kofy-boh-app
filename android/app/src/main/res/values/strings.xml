@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">22G Systems</string>
+    <string name="title_activity_main">22G Systems</string>
+    <string name="package_name">io.kofy.g22</string>
+    <string name="custom_url_scheme">io.kofy.g22</string>
+</resources>

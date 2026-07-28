@@ -1,0 +1,32 @@
+# Cloud build for 22G Systems (Kofy BOH, Capacitor) — no local Android Studio needed.
+# Connect this repo at https://codemagic.io, then start the "android-debug" workflow.
+# Produces an installable debug APK to sideload on team phones. Mirrors the
+# customer app's proven workflow (kofy-website/codemagic.yaml).
+# NOTE: no Play Store release — this app is distributed by sideload only, on
+# purpose: team-only, invisible to everyone else.
+workflows:
+  android-debug:
+    name: 22G Systems (debug APK)
+    max_build_duration: 30
+    instance_type: mac_mini_m2
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+    environment:
+      java: 21
+      node: 22
+    scripts:
+      - name: Install deps
+        script: npm ci
+      - name: Sync Capacitor → Android
+        script: npx cap sync android
+      - name: Build debug APK
+        script: |
+          cd android
+          chmod +x ./gradlew
+          ./gradlew assembleDebug
+    artifacts:
+      - android/app/build/outputs/**/*.apk
