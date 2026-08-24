@@ -33,6 +33,45 @@ npx cap add android   # first time only — generates android/
 npx cap sync android
 ```
 
+## Push notifications — currently OFF, and why
+
+**22G has no push plugin.** It was removed in v0.2 (`30bcca9`) because the
+plugin shipped without a `google-services.json` for `io.kofy.g22`, so Firebase
+initialisation crashed the shell natively as soon as the site's `PushInit` ran
+after team login.
+
+Consequence, and it is easy to misdiagnose: on this app Android shows **no
+notification toggle at all** — the manifest declares only `INTERNET`, never
+`POST_NOTIFICATIONS`. Push isn't "off", it's absent. No amount of kofy-website
+pushing can change that; native permissions only ship inside an APK.
+
+The back end is already waiting for it. `kofy-push` fans new orders out to a
+shared `team` bucket, and `kofy-website`'s `/api/push/register` files any
+`kofy_team` session's device under that bucket. The only missing link is this
+app being able to produce a device token.
+
+### Re-enabling it — in this order, or it crashes again
+
+1. **Firebase console first** (only Kafay can): in the SAME Firebase project as
+   the customer app, add an Android app with package `io.kofy.g22`, download its
+   `google-services.json`, and drop it at `android/app/google-services.json`.
+   The gradle wiring is already conditional — `android/app/build.gradle` applies
+   the google-services plugin only when that file exists, and otherwise logs
+   "Push Notifications won't work". Same project = the push worker's existing
+   FCM service account keeps working, no new server key.
+2. `npm i @capacitor/push-notifications@^6` — **version 6**, to match this
+   shell's Capacitor 6 (kofy-website is on Capacitor 8; do not copy its
+   version).
+3. Add `<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />`
+   to `android/app/src/main/AndroidManifest.xml` (Android 13+ shows no toggle
+   without it).
+4. `npx cap sync android`, rebuild on Codemagic, sideload, then in the app:
+   Hub → **Notificaciones → Activar**. That control (`PushToggle` in
+   kofy-website) reports whether the device token actually reached the worker.
+
+Step 1 is a hard prerequisite. Doing 2–3 without it reintroduces the exact
+launch crash v0.2 fixed.
+
 ## Relationship to the customer app
 
 | | Customer app | 22G Systems (this) |
@@ -41,3 +80,6 @@ npx cap sync android
 | Loads | `kofy.io` | `kofy.io/hub` |
 | Audience | Public / Play Store | Team / sideload only |
 | Repo | kofy-website (`android/`) | this repo |
+| Capacitor | 8.x | 6.x |
+| Push | plugin present | **absent — see above** |
+| Gets | order-stage pushes (customers) | new-order alerts (once push lands) |
