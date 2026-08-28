@@ -38,4 +38,10 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Android 13+ shows NO notification toggle in system settings without
+         this, so push can't be enabled at all. Paired with
+         android/app/google-services.json for io.kofy.g22 — the plugin crashes
+         the shell natively if that file is missing (see v0.2, 30bcca9). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 </manifest>

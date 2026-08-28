@@ -15,6 +15,13 @@ android/capacitor-cordova-android-plugins/
 *.jks
 google-services.json
 
+# ...but the Android one MUST be committed. It is not a secret: it ships inside
+# every APK and Google documents it as public (the customer app commits its own
+# in kofy-website). Codemagic builds from the repo, so if this file is missing
+# the build produces an APK with the push plugin and NO Firebase config — which
+# is exactly the native launch crash v0.2 removed the plugin to fix.
+!android/app/google-services.json
+
 # System
 .DS_Store
 Thumbs.db

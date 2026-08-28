@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "59120357467",
+    "project_id": "kofy-4f1d5",
+    "storage_bucket": "kofy-4f1d5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:59120357467:android:284ff787f62b9c2a676f7e",
+        "android_client_info": {
+          "package_name": "io.kofy.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCoPOiJBi_0WIgjUoJfEoPGFMiWO99voaE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:59120357467:android:91987bd86b39efc6676f7e",
+        "android_client_info": {
+          "package_name": "io.kofy.g22"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCoPOiJBi_0WIgjUoJfEoPGFMiWO99voaE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
