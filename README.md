@@ -33,7 +33,35 @@ npx cap add android   # first time only — generates android/
 npx cap sync android
 ```
 
-## Push notifications — currently OFF, and why
+## Push notifications — the bridge trap (read before touching server config)
+
+**v0.4 added the plugin. v0.5 made it reachable.** Those are two different bugs
+and the second one is invisible.
+
+Reaching `kofy.io` through `server.allowNavigation` loads it as an ordinary
+**remote page**, and Capacitor does not inject its JS runtime into remote pages.
+The symptom is deeply misleading: `window.Capacitor` is undefined, but
+`window.androidBridge` still exists, so `@capacitor/core` decides the platform
+is `android` and throws
+
+```
+"PushNotifications" plugin is not implemented on android
+```
+
+…which reads like a missing plugin. It isn't. The plugin is installed and
+correct — nothing on that page can reach ANY native code, and **no rebuild can
+fix it.** It also silently disabled the BOH tab bar, which only renders when
+`useAppMode()` sees `window.Capacitor`.
+
+Fix: **origin-only `server.url`** (`https://kofy.io`, never a path — a pathed
+one was the v0.1/v0.2 crash suspect). The app then opens at the site root, so
+it tags its user agent (`appendUserAgent: 'KofyBOH/22G'`) and kofy-website's
+`middleware.ts` redirects `/` → `/hub`.
+
+If push ever goes quiet again, check `puente:` on **kofy.io/hub/notificaciones**
+first — `puente: no` means this bridge problem, not a plugin or Firebase one.
+
+## History — how push was originally lost
 
 **22G has no push plugin.** It was removed in v0.2 (`30bcca9`) because the
 plugin shipped without a `google-services.json` for `io.kofy.g22`, so Firebase
