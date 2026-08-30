@@ -44,4 +44,11 @@
          android/app/google-services.json for io.kofy.g22 — the plugin crashes
          the shell natively if that file is missing (see v0.2, 30bcca9). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- QR scanning (@capacitor-mlkit/barcode-scanning). The plugin does NOT
+         declare this itself, so without it the scan button opens and dies.
+         Camera is optional hardware: required="false" keeps the app
+         installable on a device without one. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 </manifest>
