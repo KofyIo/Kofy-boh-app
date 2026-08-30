@@ -30,3 +30,37 @@ workflows:
           ./gradlew assembleDebug
     artifacts:
       - android/app/build/outputs/**/*.apk
+    publishing:
+      # Register the build so the team can install it themselves. Until now a new
+      # APK had to be fetched from this dashboard and passed around on WhatsApp;
+      # the app and kofy.io/hub/app now read this and offer the download, and the
+      # worker pushes "Nueva versión de 22G" to every BOH phone.
+      #
+      # PUSH_SECRET must be set in Codemagic → Environment variables (same value
+      # as the kofy-push worker's PUSH_SECRET / Vercel MAIL_SEND_SECRET), and
+      # marked secure. Without it this step is skipped, not failed — a release
+      # note is never worth breaking a good build over.
+      scripts:
+        - name: Register release for in-app update
+          script: |
+            set -e
+            if [ -z "$PUSH_SECRET" ]; then
+              echo "PUSH_SECRET not set — skipping release registration"
+              exit 0
+            fi
+            VERSION=$(node -p "require('./package.json').version")
+            # CM_ARTIFACT_LINKS is a JSON array of {name,type,url} for this build.
+            APK_URL=$(node -e "
+              const a = JSON.parse(process.env.CM_ARTIFACT_LINKS || '[]');
+              const apk = a.find(x => (x.name||'').endsWith('.apk')) || a[0];
+              process.stdout.write(apk && apk.url ? apk.url : '');
+            ")
+            if [ -z "$APK_URL" ]; then
+              echo "No APK artifact link found — skipping"
+              exit 0
+            fi
+            echo "Registering 22G v$VERSION"
+            curl -sS -X POST https://kofy-push.delicate-surf-529c.workers.dev/release \
+              -H "Content-Type: application/json" \
+              -d "{\"secret\":\"$PUSH_SECRET\",\"version\":\"$VERSION\",\"url\":\"$APK_URL\",\"notes\":\"$CM_COMMIT_MESSAGE\"}"
+            echo

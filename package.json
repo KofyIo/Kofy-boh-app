@@ -1,6 +1,6 @@
 {
   "name": "kofy-boh-app",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "private": true,
   "description": "22G Systems — Kofy back-of-house native shell. Thin Capacitor app that loads the team tools (kofy.io internal zone). No tool code lives here.",
   "scripts": {
