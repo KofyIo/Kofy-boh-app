@@ -63,22 +63,18 @@ first — `puente: no` means this bridge problem, not a plugin or Firebase one.
 
 ## History — how push was originally lost
 
-**22G has no push plugin.** It was removed in v0.2 (`30bcca9`) because the
-plugin shipped without a `google-services.json` for `io.kofy.g22`, so Firebase
-initialisation crashed the shell natively as soon as the site's `PushInit` ran
-after team login.
+**Resolved in v0.4–v0.5 — kept because the failure mode is worth recognising.**
 
-Consequence, and it is easy to misdiagnose: on this app Android shows **no
-notification toggle at all** — the manifest declares only `INTERNET`, never
-`POST_NOTIFICATIONS`. Push isn't "off", it's absent. No amount of kofy-website
-pushing can change that; native permissions only ship inside an APK.
+The plugin was removed in v0.2 (`30bcca9`) because it shipped without a
+`google-services.json` for `io.kofy.g22`, so Firebase initialisation crashed the
+shell natively as soon as the site's `PushInit` ran after team login.
 
-The back end is already waiting for it. `kofy-push` fans new orders out to a
-shared `team` bucket, and `kofy-website`'s `/api/push/register` files any
-`kofy_team` session's device under that bucket. The only missing link is this
-app being able to produce a device token.
+It was easy to misdiagnose: with no `POST_NOTIFICATIONS` in the manifest, Android
+shows **no notification toggle at all**. Push wasn't "off", it was absent — and
+no amount of kofy-website pushing could change that, because native permissions
+only ship inside an APK.
 
-### Re-enabling it — in this order, or it crashes again
+### The order that mattered (and still does, if it is ever redone)
 
 1. **Firebase console first** (only Kafay can): in the SAME Firebase project as
    the customer app, add an Android app with package `io.kofy.g22`, download its
@@ -100,17 +96,21 @@ app being able to produce a device token.
 Step 1 is a hard prerequisite. Doing 2–3 without it reintroduces the exact
 launch crash v0.2 fixed.
 
+Note that step 1 alone was still not enough — the plugin was installed correctly
+in v0.4 and remained unreachable until v0.5 fixed the bridge. See the section
+above.
+
 ## Relationship to the customer app
 
 | | Customer app | 22G Systems (this) |
 |---|---|---|
 | appId | `io.kofy.app` | `io.kofy.g22` |
-| Loads | `kofy.io` | `kofy.io/hub` |
+| Loads | `kofy.io` (server.url) | `kofy.io` → redirected to `/hub` by user agent |
 | Audience | Public / Play Store | Team / sideload only |
 | Repo | kofy-website (`android/`) | this repo |
 | Capacitor | 8.x | 6.x |
-| Push | plugin present | **absent — see above** |
-| Gets | order-stage pushes (customers) | new-order alerts (once push lands) |
+| Push | plugin present | working since v0.5 |
+| Gets | order-stage pushes (customers) | new-order alerts |
 
 ## Back gesture — do NOT set `enableOnBackInvokedCallback`
 
