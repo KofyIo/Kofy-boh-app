@@ -111,3 +111,29 @@ launch crash v0.2 fixed.
 | Capacitor | 8.x | 6.x |
 | Push | plugin present | **absent — see above** |
 | Gets | order-stage pushes (customers) | new-order alerts (once push lands) |
+
+## Back gesture — do NOT set `enableOnBackInvokedCallback`
+
+Verified 2026-08-30 by reading the installed sources.
+
+`@capacitor/app@6` registers back handling through the **legacy**
+`OnBackPressedDispatcher` (`AppPlugin.java` → `getOnBackPressedDispatcher()
+.addCallback(...)`), and `OnBackInvokedCallback` appears **nowhere** in
+Capacitor 6. Android 13+ only routes back to the new API when the manifest opts
+in with `android:enableOnBackInvokedCallback="true"` — and on that path the
+legacy dispatcher is bypassed.
+
+So setting that flag here would **silently break back navigation again**: the
+app would go straight back to quitting on a back gesture, which is exactly the
+bug v0.6 fixed. It looks like a modernisation and is a regression.
+
+### And why Instagram-style edge-back isn't the target
+
+Android's system gesture owns the screen edges. A custom "drag from the edge and
+the page peels" gesture fights it, and reclaiming the edge needs native
+`setSystemGestureExclusionRects` (capped at 200dp, per-view, fiddly).
+
+The platform-correct version of that feel is Android's **predictive back**, which
+needs Capacitor 8 or hand-written native code. 22G is on Capacitor 6 — so that's
+a version upgrade project, not an afternoon's gesture work. Worth doing
+deliberately, not by flipping a manifest flag.
